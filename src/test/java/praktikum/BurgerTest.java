@@ -19,10 +19,10 @@ public class BurgerTest {
     private Bun bun;
 
     @Mock
-    private Ingredient ingredient1;
+    private Ingredient sauceIngredient;
 
     @Mock
-    private Ingredient ingredient2;
+    private Ingredient fillingIngredient;
 
     @Before
     public void setUp() {
@@ -38,28 +38,28 @@ public class BurgerTest {
     @Test
     public void testAddIngredientIncreasesSize() {
         int initialSize = burger.ingredients.size();
-        burger.addIngredient(ingredient1);
+        burger.addIngredient(sauceIngredient);
         assertEquals("Количество ингредиентов должно увеличиться на 1",
                 initialSize + 1, burger.ingredients.size());
     }
 
     @Test
     public void testAddedIngredientIsPresent() {
-        burger.addIngredient(ingredient1);
+        burger.addIngredient(sauceIngredient);
         assertTrue("Добавленный ингредиент должен присутствовать",
-                burger.ingredients.contains(ingredient1));
+                burger.ingredients.contains(sauceIngredient));
     }
 
     @Test
     public void testAddMultipleIngredients() {
-        burger.addIngredient(ingredient1);
-        burger.addIngredient(ingredient2);
+        burger.addIngredient(sauceIngredient);
+        burger.addIngredient(fillingIngredient);
         assertEquals("Должно быть 2 ингредиента", 2, burger.ingredients.size());
     }
 
     @Test
     public void testRemoveIngredient() {
-        burger.addIngredient(ingredient1);
+        burger.addIngredient(sauceIngredient);
         burger.removeIngredient(0);
         assertTrue("Список должен быть пуст после удаления",
                 burger.ingredients.isEmpty());
@@ -71,14 +71,21 @@ public class BurgerTest {
     }
 
     @Test
-    public void testMoveIngredient() {
-        burger.addIngredient(ingredient1);
-        burger.addIngredient(ingredient2);
+    public void testMoveIngredientFirstToSecondPosition() {
+        burger.addIngredient(sauceIngredient);
+        burger.addIngredient(fillingIngredient);
         burger.moveIngredient(0, 1);
         assertEquals("Ингредиент должен переместиться на вторую позицию",
-                ingredient1, burger.ingredients.get(1));
+                sauceIngredient, burger.ingredients.get(1));
+    }
+
+    @Test
+    public void testMoveIngredientSecondToFirstPosition() {
+        burger.addIngredient(sauceIngredient);
+        burger.addIngredient(fillingIngredient);
+        burger.moveIngredient(1, 0);
         assertEquals("Второй ингредиент должен стать первым",
-                ingredient2, burger.ingredients.get(0));
+                fillingIngredient, burger.ingredients.get(0));
     }
 
     @Test(expected = IndexOutOfBoundsException.class)
@@ -88,16 +95,14 @@ public class BurgerTest {
 
     @Test
     public void testGetPrice() {
-        // Используем WHITE_BUN
         when(bun.getPrice()).thenReturn(WHITE_BUN_PRICE);
-        when(ingredient1.getPrice()).thenReturn(SOUR_CREAM_PRICE);
-        when(ingredient2.getPrice()).thenReturn(DINOSAUR_PRICE);
+        when(sauceIngredient.getPrice()).thenReturn(SOUR_CREAM_PRICE);
+        when(fillingIngredient.getPrice()).thenReturn(DINOSAUR_PRICE);
 
         burger.setBuns(bun);
-        burger.addIngredient(ingredient1);
-        burger.addIngredient(ingredient2);
+        burger.addIngredient(sauceIngredient);
+        burger.addIngredient(fillingIngredient);
 
-        // Ожидаемая цена: (200*2) + 200 + 200 = 800
         float expectedPrice = WHITE_BUN_PRICE * 2 + SOUR_CREAM_PRICE + DINOSAUR_PRICE;
         assertEquals("Цена должна быть рассчитана корректно",
                 expectedPrice, burger.getPrice(), 0.0);
@@ -105,15 +110,14 @@ public class BurgerTest {
 
     @Test
     public void testGetReceipt() {
-        // Используем RED_BUN и CHILI_SAUCE
         when(bun.getName()).thenReturn(RED_BUN_NAME);
         when(bun.getPrice()).thenReturn(RED_BUN_PRICE);
-        when(ingredient1.getType()).thenReturn(IngredientType.SAUCE);
-        when(ingredient1.getName()).thenReturn(CHILI_SAUCE_NAME);
-        when(ingredient1.getPrice()).thenReturn(CHILI_SAUCE_PRICE);
+        when(sauceIngredient.getType()).thenReturn(IngredientType.SAUCE);
+        when(sauceIngredient.getName()).thenReturn(CHILI_SAUCE_NAME);
+        when(sauceIngredient.getPrice()).thenReturn(CHILI_SAUCE_PRICE);
 
         burger.setBuns(bun);
-        burger.addIngredient(ingredient1);
+        burger.addIngredient(sauceIngredient);
 
         String expectedReceipt = String.format(RECEIPT_STRUCTURE,
                 RED_BUN_NAME, "sauce", CHILI_SAUCE_NAME,
@@ -125,14 +129,12 @@ public class BurgerTest {
 
     @Test
     public void testGetPriceWithDifferentBun() {
-        // Тестируем BLACK_BUN с SAUSAGE
         when(bun.getPrice()).thenReturn(BLACK_BUN_PRICE);
-        when(ingredient1.getPrice()).thenReturn(SAUSAGE_PRICE);
+        when(fillingIngredient.getPrice()).thenReturn(SAUSAGE_PRICE);
 
         burger.setBuns(bun);
-        burger.addIngredient(ingredient1);
+        burger.addIngredient(fillingIngredient);
 
-        // (100*2) + 300 = 500
         float expectedPrice = BLACK_BUN_PRICE * 2 + SAUSAGE_PRICE;
         assertEquals("Цена должна быть рассчитана с другой булочкой",
                 expectedPrice, burger.getPrice(), 0.0);
@@ -140,15 +142,14 @@ public class BurgerTest {
 
     @Test
     public void testGetReceiptWithFilling() {
-        // Тестируем BLACK_BUN с CUTLET
         when(bun.getName()).thenReturn(BLACK_BUN_NAME);
         when(bun.getPrice()).thenReturn(BLACK_BUN_PRICE);
-        when(ingredient1.getType()).thenReturn(IngredientType.FILLING);
-        when(ingredient1.getName()).thenReturn(CUTLET_NAME);
-        when(ingredient1.getPrice()).thenReturn(CUTLET_PRICE);
+        when(fillingIngredient.getType()).thenReturn(IngredientType.FILLING);
+        when(fillingIngredient.getName()).thenReturn(CUTLET_NAME);
+        when(fillingIngredient.getPrice()).thenReturn(CUTLET_PRICE);
 
         burger.setBuns(bun);
-        burger.addIngredient(ingredient1);
+        burger.addIngredient(fillingIngredient);
 
         String expectedReceipt = String.format(RECEIPT_STRUCTURE,
                 BLACK_BUN_NAME, "filling", CUTLET_NAME,
